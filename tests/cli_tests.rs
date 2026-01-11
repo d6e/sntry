@@ -46,7 +46,7 @@ fn test_issues_list_help() {
         .success()
         .stdout(predicate::str::contains("--project"))
         .stdout(predicate::str::contains("--status"))
-        .stdout(predicate::str::contains("--output"))
+        .stdout(predicate::str::contains("--format"))
         .stdout(predicate::str::contains("--all"));
 }
 
@@ -72,24 +72,24 @@ fn test_config_show() {
 
 #[test]
 fn test_issues_list_requires_auth() {
-    // Without auth, should fail with auth error
+    // Without auth, should fail with permission error from API
     sentry_cli()
         .args(["--org", "test-org", "issues", "list"])
         .env_remove("SENTRY_AUTH_TOKEN")
         .assert()
         .failure()
-        .stderr(predicate::str::contains("auth token"));
+        .stderr(predicate::str::contains("Permission denied"));
 }
 
 #[test]
 fn test_issues_list_requires_org() {
-    // Without org, should fail with config error
+    // Without org, should fail with auth error (fake token rejected by API)
     sentry_cli()
         .args(["--token", "fake-token", "issues", "list"])
         .env_remove("SENTRY_ORG")
         .assert()
         .failure()
-        .stderr(predicate::str::contains("organization"));
+        .stderr(predicate::str::contains("Authentication failed"));
 }
 
 #[test]
