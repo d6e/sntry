@@ -50,20 +50,26 @@ pub struct Cli {
 #[derive(Subcommand)]
 pub enum Commands {
     /// Manage Sentry issues
-    #[command(alias = "i", after_help = "EXAMPLES:
+    #[command(
+        alias = "i",
+        after_help = "EXAMPLES:
     sentry issues list --project myproject
     sentry issues list --status unresolved --limit 50
     sentry issues view ISSUE-123
-    sentry issues resolve ISSUE-123 ISSUE-456")]
+    sentry issues resolve ISSUE-123 ISSUE-456"
+    )]
     Issues {
         #[command(subcommand)]
         command: IssuesCommands,
     },
     /// Manage CLI configuration
-    #[command(alias = "cfg", after_help = "EXAMPLES:
+    #[command(
+        alias = "cfg",
+        after_help = "EXAMPLES:
     sentry config init
     sentry config show
-    sentry config set default_org myorg")]
+    sentry config set default_org myorg"
+    )]
     Config {
         #[command(subcommand)]
         command: ConfigCommands,
@@ -83,10 +89,13 @@ pub enum Commands {
 #[derive(Subcommand)]
 pub enum IssuesCommands {
     /// List issues with optional filtering
-    #[command(alias = "ls", after_help = "EXAMPLES:
+    #[command(
+        alias = "ls",
+        after_help = "EXAMPLES:
     sentry issues list
     sentry issues list --project myproject --status unresolved
-    sentry issues list --query \"is:unresolved\" --limit 100")]
+    sentry issues list --query \"is:unresolved\" --limit 100"
+    )]
     List {
         /// Filter by project slug(s), comma-separated
         #[arg(long, short)]
@@ -97,7 +106,7 @@ pub enum IssuesCommands {
         status: Option<String>,
 
         /// Sentry search query string
-        #[arg(long, short)]
+        #[arg(long)]
         query: Option<String>,
 
         /// Sort by: date, new, freq, user
@@ -114,18 +123,25 @@ pub enum IssuesCommands {
     },
 
     /// View detailed issue information
-    #[command(alias = "show", alias = "v", after_help = "EXAMPLES:
+    #[command(
+        alias = "show",
+        alias = "v",
+        after_help = "EXAMPLES:
     sentry issues view ISSUE-123
-    sentry issues view 12345678")]
+    sentry issues view 12345678"
+    )]
     View {
         /// Issue ID or short ID
         issue_id: String,
     },
 
     /// Resolve one or more issues
-    #[command(alias = "r", after_help = "EXAMPLES:
+    #[command(
+        alias = "r",
+        after_help = "EXAMPLES:
     sentry issues resolve ISSUE-123
-    sentry issues resolve ISSUE-123 ISSUE-456 --in-next-release")]
+    sentry issues resolve ISSUE-123 ISSUE-456 --in-next-release"
+    )]
     Resolve {
         /// Issue ID(s) to resolve
         #[arg(required = true)]
@@ -150,10 +166,13 @@ pub enum IssuesCommands {
     },
 
     /// Assign issue(s) to a user or team
-    #[command(alias = "a", after_help = "EXAMPLES:
+    #[command(
+        alias = "a",
+        after_help = "EXAMPLES:
     sentry issues assign ISSUE-123 --to user@example.com
     sentry issues assign ISSUE-123 --to team:backend
-    sentry issues assign ISSUE-123 --unassign")]
+    sentry issues assign ISSUE-123 --unassign"
+    )]
     Assign {
         /// Issue ID(s) to assign
         #[arg(required = true)]
