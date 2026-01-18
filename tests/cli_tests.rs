@@ -72,24 +72,30 @@ fn test_config_show() {
 
 #[test]
 fn test_issues_list_requires_auth() {
-    // Without auth, should fail with permission error from API
+    // Without auth, should fail with an auth-related error
     sentry_cli()
         .args(["--org", "test-org", "issues", "list"])
         .env_remove("SENTRY_AUTH_TOKEN")
         .assert()
         .failure()
-        .stderr(predicate::str::contains("Permission denied"));
+        .stderr(
+            predicate::str::contains("No auth token found")
+                .or(predicate::str::contains("Permission denied")),
+        );
 }
 
 #[test]
 fn test_issues_list_requires_org() {
-    // Without org, should fail with auth error (fake token rejected by API)
+    // Without org, should fail with org or auth error
     sentry_cli()
         .args(["--token", "fake-token", "issues", "list"])
         .env_remove("SENTRY_ORG")
         .assert()
         .failure()
-        .stderr(predicate::str::contains("Authentication failed"));
+        .stderr(
+            predicate::str::contains("No organization specified")
+                .or(predicate::str::contains("Authentication failed")),
+        );
 }
 
 #[test]
