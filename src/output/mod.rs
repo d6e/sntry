@@ -37,19 +37,3 @@ pub fn set_quiet(quiet: bool) {
 pub fn is_quiet() -> bool {
     QUIET_MODE.load(Ordering::Relaxed)
 }
-
-pub fn is_json_output() -> bool {
-    matches!(get_format(), OutputFormat::Json)
-}
-
-/// Print a success message (respects quiet mode)
-pub fn print_message(message: &str) {
-    if is_quiet() {
-        return;
-    }
-    if is_json_output() {
-        println!(r#"{{"message": "{}"}}"#, message.replace('"', "\\\""));
-    } else {
-        println!("{message}");
-    }
-}
