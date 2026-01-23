@@ -62,6 +62,18 @@ pub enum Commands {
         #[command(subcommand)]
         command: IssuesCommands,
     },
+    /// Manage releases
+    #[command(
+        alias = "r",
+        after_help = "EXAMPLES:
+    sentry releases list
+    sentry releases list --limit 50
+    sentry releases view v0.90.1"
+    )]
+    Releases {
+        #[command(subcommand)]
+        command: ReleasesCommands,
+    },
     /// Manage CLI configuration
     #[command(
         alias = "cfg",
@@ -257,5 +269,43 @@ pub enum ConfigCommands {
         key: String,
         /// Configuration value
         value: String,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum ReleasesCommands {
+    /// List releases
+    #[command(
+        alias = "ls",
+        after_help = "EXAMPLES:
+    sentry releases list
+    sentry releases list --limit 50
+    sentry releases list --all"
+    )]
+    List {
+        /// Sentry search query string
+        #[arg(long)]
+        query: Option<String>,
+
+        /// Maximum number of results per page
+        #[arg(long, default_value = "25")]
+        limit: u32,
+
+        /// Fetch all pages (may be slow for large result sets)
+        #[arg(long)]
+        all: bool,
+    },
+
+    /// View detailed release information
+    #[command(
+        alias = "show",
+        alias = "v",
+        after_help = "EXAMPLES:
+    sentry releases view v0.90.1
+    sentry releases view 1.0.0"
+    )]
+    View {
+        /// Release version
+        version: String,
     },
 }

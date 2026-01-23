@@ -8,8 +8,8 @@ use std::error::Error;
 
 use clap::{CommandFactory, Parser};
 use clap_complete::generate;
-use cli::args::{Cli, Commands, ConfigCommands, IssuesCommands};
-use cli::commands::{config as config_cmd, issues};
+use cli::args::{Cli, Commands, ConfigCommands, IssuesCommands, ReleasesCommands};
+use cli::commands::{config as config_cmd, issues, releases};
 use config::load_config;
 use output::print_error;
 
@@ -105,6 +105,25 @@ async fn run() -> error::Result<()> {
                     other_ids,
                 } => {
                     issues::merge_issues(&client, primary_id, other_ids).await?;
+                }
+            }
+        }
+        Commands::Releases { command } => {
+            let client = api::SentryClient::new(
+                &config,
+                cli.org.as_deref(),
+                cli.server.as_deref(),
+                cli.token.as_deref(),
+                cli.verbose,
+            )?;
+
+            match command {
+                ReleasesCommands::List { query, limit, all } => {
+                    let options = releases::ListOptions { query, limit, all };
+                    releases::list_releases(&client, options).await?;
+                }
+                ReleasesCommands::View { version } => {
+                    releases::view_release(&client, &version).await?;
                 }
             }
         }

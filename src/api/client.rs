@@ -1,4 +1,4 @@
-use crate::api::models::{ApiError, Issue, IssueUpdate, ListIssuesParams};
+use crate::api::models::{ApiError, Issue, IssueUpdate, ListIssuesParams, ListReleasesParams, Release};
 use crate::config::Config;
 use crate::error::{Result, SentryCliError};
 use reqwest::{Client, Response, StatusCode};
@@ -395,6 +395,124 @@ impl SentryClient {
             .put(url)
             .bearer_auth(&self.auth_token)
             .json(&update)
+            .send()
+            .await?;
+
+        self.handle_response(response).await
+    }
+
+    fn build_releases_url(&self, params: &ListReleasesParams) -> Result<Url> {
+        let mut url = self.api_url(&format!("organizations/{}/releases/", self.org_slug))?;
+
+        {
+            let mut query_pairs = url.query_pairs_mut();
+
+            if let Some(query) = &params.query {
+                query_pairs.append_pair("query", query);
+            }
+
+            if let Some(limit) = params.limit {
+                query_pairs.append_pair("per_page", &limit.to_string());
+            }
+
+            if let Some(cursor) = &params.cursor {
+                query_pairs.append_pair("cursor", cursor);
+            }
+        }
+
+        Ok(url)
+    }
+
+    pub async fn list_releases(&self, params: ListReleasesParams) -> Result<Vec<Release>> {
+        let url = self.build_releases_url(&params)?;
+
+        self.log_request("GET", &url);
+
+        let response = self
+            .client
+            .get(url)
+            .bearer_auth(&self.auth_token)
+            .send()
+            .await?;
+
+        self.handle_response(response).await
+    }
+
+    /// List all releases with automatic pagination
+    pub async fn list_all_releases(&self, params: ListReleasesParams) -> Result<Vec<Release>> {
+        let mut all_releases = Vec::new();
+        let mut cursor: Option<String> = None;
+        let mut page = 1;
+
+        loop {
+            let page_params = ListReleasesParams {
+                cursor: cursor.clone(),
+                ..params.clone()
+            };
+
+            let url = self.build_releases_url(&page_params)?;
+
+            self.log_request("GET", &url);
+            if self.verbose {
+                eprintln!("[verbose] Fetching page {}...", page);
+            }
+
+            let response = self
+                .client
+                .get(url)
+                .bearer_auth(&self.auth_token)
+                .send()
+                .await?;
+
+            let status = response.status();
+            self.log_response(status);
+
+            if !status.is_success() {
+                return Err(self.map_error_response(status, response).await);
+            }
+
+            // Get Link header before consuming response
+            let link_header = response
+                .headers()
+                .get("link")
+                .and_then(|v| v.to_str().ok())
+                .map(String::from);
+
+            let releases: Vec<Release> = response.json().await?;
+            let count = releases.len();
+            all_releases.extend(releases);
+
+            if self.verbose {
+                eprintln!(
+                    "[verbose] Got {} releases (total: {})",
+                    count,
+                    all_releases.len()
+                );
+            }
+
+            // Check for next page
+            cursor = Self::parse_next_cursor(link_header.as_deref());
+            if cursor.is_none() {
+                break;
+            }
+            page += 1;
+        }
+
+        Ok(all_releases)
+    }
+
+    pub async fn get_release(&self, version: &str) -> Result<Release> {
+        let url = self.api_url(&format!(
+            "organizations/{}/releases/{}/",
+            self.org_slug, version
+        ))?;
+
+        self.log_request("GET", &url);
+
+        let response = self
+            .client
+            .get(url)
+            .bearer_auth(&self.auth_token)
             .send()
             .await?;
 

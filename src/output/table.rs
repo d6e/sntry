@@ -1,4 +1,4 @@
-use crate::api::models::Issue;
+use crate::api::models::{Issue, Release};
 use chrono::{DateTime, Utc};
 use colored::Colorize;
 use tabled::settings::Style;
@@ -153,4 +153,100 @@ pub fn print_success(message: &str) {
 
 pub fn print_error(message: &str) {
     eprintln!("{} {}", "✗".red(), message);
+}
+
+#[derive(Tabled)]
+struct ReleaseRow {
+    #[tabled(rename = "Version")]
+    version: String,
+    #[tabled(rename = "Created")]
+    created: String,
+    #[tabled(rename = "Projects")]
+    projects: String,
+    #[tabled(rename = "New Issues")]
+    new_groups: String,
+}
+
+impl From<&Release> for ReleaseRow {
+    fn from(release: &Release) -> Self {
+        let created = chrono::DateTime::parse_from_rfc3339(&release.date_created)
+            .map(|dt| dt.with_timezone(&Utc))
+            .ok();
+
+        let projects_str = if release.projects.is_empty() {
+            "-".to_string()
+        } else if release.projects.len() == 1 {
+            release.projects[0].slug.clone()
+        } else {
+            format!("{} projects", release.projects.len())
+        };
+
+        Self {
+            version: release.version.clone(),
+            created: created.map(|dt| format_relative_time(&dt)).unwrap_or_else(|| "-".to_string()),
+            projects: projects_str,
+            new_groups: release.new_groups.to_string(),
+        }
+    }
+}
+
+pub fn print_releases_table(releases: &[Release]) {
+    if releases.is_empty() {
+        println!("No releases found.");
+        return;
+    }
+
+    let rows: Vec<ReleaseRow> = releases.iter().map(ReleaseRow::from).collect();
+    let table = Table::new(rows).with(Style::rounded()).to_string();
+
+    println!("{table}");
+    println!("Showing {} release(s)", releases.len());
+}
+
+pub fn print_release_details(release: &Release) {
+    let separator = "=".repeat(80);
+
+    println!();
+    println!("{}: {}", "Release".bold(), release.version.cyan());
+    println!("{separator}");
+
+    let created = chrono::DateTime::parse_from_rfc3339(&release.date_created)
+        .map(|dt| dt.with_timezone(&Utc))
+        .ok();
+
+    if let Some(dt) = created {
+        println!("{:<15} {}", "Created:".bold(), dt.format("%Y-%m-%d %H:%M:%S UTC"));
+    }
+
+    if let Some(ref date_released) = release.date_released {
+        if let Ok(dt) = chrono::DateTime::parse_from_rfc3339(date_released) {
+            println!("{:<15} {}", "Released:".bold(), dt.with_timezone(&Utc).format("%Y-%m-%d %H:%M:%S UTC"));
+        }
+    }
+
+    println!("{:<15} {}", "New Issues:".bold(), release.new_groups);
+
+    if !release.projects.is_empty() {
+        println!("\n{}:", "Projects".bold());
+        for project in &release.projects {
+            println!("  • {} ({})", project.name, project.slug);
+        }
+    }
+
+    if !release.authors.is_empty() {
+        println!("\n{}:", "Authors".bold());
+        for author in &release.authors {
+            if let Some(ref email) = author.email {
+                println!("  • {} <{}>", author.name, email);
+            } else {
+                println!("  • {}", author.name);
+            }
+        }
+    }
+
+    if let Some(ref last_deploy) = release.last_deploy {
+        println!("\n{}: {}", "Last Deploy".bold(), last_deploy.environment.green());
+    }
+
+    println!();
 }
