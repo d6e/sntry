@@ -1,4 +1,4 @@
-use crate::api::models::{Issue, Release};
+use crate::api::models::{Breadcrumb, Event, EventEntry, ExceptionValue, Issue, Release, StackFrame};
 use chrono::{DateTime, Utc};
 use colored::Colorize;
 use tabled::settings::Style;
@@ -46,7 +46,7 @@ pub fn print_issues_table(issues: &[Issue]) {
     println!("Showing {} issue(s)", issues.len());
 }
 
-pub fn print_issue_detail(issue: &Issue) {
+pub fn print_issue_detail(issue: &Issue, event: Option<&Event>) {
     let separator = "=".repeat(80);
 
     println!();
@@ -97,7 +97,158 @@ pub fn print_issue_detail(issue: &Issue) {
 
     println!();
     println!("{:<12} {}", "Link:".bold(), issue.permalink.blue());
+
+    // Print event details if available
+    if let Some(event) = event {
+        print_event_details(event);
+    }
+
     println!();
+}
+
+fn print_event_details(event: &Event) {
+    let separator = "=".repeat(80);
+
+    println!();
+    println!("{separator}");
+    println!("{}", "Event Details".bold().cyan());
+    println!("{separator}");
+
+    // Print exception information
+    for entry in &event.entries {
+        match entry {
+            EventEntry::Exception { data } => {
+                for (i, exception) in data.values.iter().enumerate() {
+                    if i > 0 {
+                        println!("\n{}", "Caused by:".yellow().bold());
+                    }
+                    print_exception(exception);
+                }
+            }
+            EventEntry::Message { data } => {
+                println!("\n{}:", "Message".bold());
+                println!("{}", data.formatted);
+            }
+            _ => {}
+        }
+    }
+
+    // Print breadcrumbs
+    let breadcrumbs = event.breadcrumbs.as_ref()
+        .or_else(|| {
+            event.entries.iter().find_map(|entry| match entry {
+                EventEntry::Breadcrumbs { data } => Some(data),
+                _ => None,
+            })
+        });
+
+    if let Some(breadcrumbs_data) = breadcrumbs {
+        print_breadcrumbs(&breadcrumbs_data.values);
+    }
+
+    // Print tags
+    if !event.tags.is_empty() {
+        println!("\n{}:", "Tags".bold());
+        for tag in &event.tags {
+            println!("  {} = {}", tag.key.cyan(), tag.value);
+        }
+    }
+
+    // Print context (showing important ones)
+    if !event.contexts.is_empty() {
+        println!("\n{}:", "Context".bold());
+        for (key, value) in &event.contexts {
+            if let Some(obj) = value.as_object() {
+                println!("  {}:", key.cyan());
+                for (k, v) in obj {
+                    if let Some(s) = v.as_str() {
+                        println!("    {} = {}", k, s);
+                    } else if let Some(n) = v.as_number() {
+                        println!("    {} = {}", k, n);
+                    } else if let Some(b) = v.as_bool() {
+                        println!("    {} = {}", k, b);
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn print_exception(exception: &ExceptionValue) {
+    println!("\n{}:", "Exception".bold().red());
+    println!("  {}: {}", "Type".bold(), exception.exception_type.red());
+    println!("  {}: {}", "Value".bold(), exception.value);
+
+    if let Some(stacktrace) = &exception.stacktrace {
+        println!("\n  {}:", "Stack Trace".bold());
+
+        // Print frames in reverse order (most recent first)
+        for frame in stacktrace.frames.iter().rev() {
+            print_stack_frame(frame);
+        }
+    }
+}
+
+fn print_stack_frame(frame: &StackFrame) {
+    let in_app_marker = if frame.in_app { "▶ ".green() } else { "  ".into() };
+
+    let function = frame.function.as_deref().unwrap_or("<unknown>");
+    let filename = frame.filename.as_deref().unwrap_or("<unknown>");
+
+    if let Some(lineno) = frame.lineno {
+        println!(
+            "{}  {} in {}:{}",
+            in_app_marker,
+            function.cyan(),
+            filename.dimmed(),
+            lineno
+        );
+    } else {
+        println!(
+            "{}  {} in {}",
+            in_app_marker,
+            function.cyan(),
+            filename.dimmed()
+        );
+    }
+
+    // Print context if available
+    if let Some(context_line) = &frame.context_line {
+        if let Some(lineno) = frame.lineno {
+            println!("      {} {}", format!("{:>4}", lineno).dimmed(), context_line);
+        }
+    }
+}
+
+fn print_breadcrumbs(breadcrumbs: &[Breadcrumb]) {
+    if breadcrumbs.is_empty() {
+        return;
+    }
+
+    println!("\n{}:", "Breadcrumbs".bold());
+
+    // Show last 10 breadcrumbs
+    let start = breadcrumbs.len().saturating_sub(10);
+    for breadcrumb in &breadcrumbs[start..] {
+        let timestamp = breadcrumb.timestamp.as_deref().unwrap_or("");
+        let category = breadcrumb.category.as_deref().unwrap_or("default");
+        let level = breadcrumb.level.as_deref().unwrap_or("info");
+        let message = breadcrumb.message.as_deref().unwrap_or("");
+
+        let level_color = match level {
+            "error" => message.red(),
+            "warning" => message.yellow(),
+            _ => message.normal(),
+        };
+
+        println!(
+            "  {} [{}] {}: {}",
+            timestamp.dimmed(),
+            category.cyan(),
+            level,
+            level_color
+        );
+    }
 }
 
 fn format_status(status: &crate::api::models::IssueStatus) -> String {

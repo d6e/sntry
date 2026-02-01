@@ -1,4 +1,4 @@
-use crate::api::models::{ApiError, Issue, IssueUpdate, ListIssuesParams, ListReleasesParams, Release};
+use crate::api::models::{ApiError, Event, Issue, IssueUpdate, ListIssuesParams, ListReleasesParams, Release};
 use crate::config::Config;
 use crate::error::{Result, SentryCliError};
 use reqwest::{Client, Response, StatusCode};
@@ -240,6 +240,24 @@ impl SentryClient {
     pub async fn get_issue(&self, issue_id: &str) -> Result<Issue> {
         let url = self.api_url(&format!(
             "organizations/{}/issues/{}/",
+            self.org_slug, issue_id
+        ))?;
+
+        self.log_request("GET", &url);
+
+        let response = self
+            .client
+            .get(url)
+            .bearer_auth(&self.auth_token)
+            .send()
+            .await?;
+
+        self.handle_response(response).await
+    }
+
+    pub async fn get_latest_event(&self, issue_id: &str) -> Result<Event> {
+        let url = self.api_url(&format!(
+            "organizations/{}/issues/{}/events/latest/",
             self.org_slug, issue_id
         ))?;
 
