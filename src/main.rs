@@ -8,8 +8,8 @@ use std::error::Error;
 
 use clap::{CommandFactory, Parser};
 use clap_complete::generate;
-use cli::args::{Cli, Commands, ConfigCommands, IssuesCommands, ReleasesCommands};
-use cli::commands::{config as config_cmd, issues, releases};
+use cli::args::{Cli, Commands, ConfigCommands, EventsCommands, IssuesCommands, ReleasesCommands};
+use cli::commands::{config as config_cmd, events, issues, releases};
 use config::load_config;
 use output::print_error;
 
@@ -124,6 +124,25 @@ async fn run() -> error::Result<()> {
                 }
                 ReleasesCommands::View { version } => {
                     releases::view_release(&client, &version).await?;
+                }
+            }
+        }
+        Commands::Events { command } => {
+            let client = api::SentryClient::new(
+                &config,
+                cli.org.as_deref(),
+                cli.server.as_deref(),
+                cli.token.as_deref(),
+                cli.verbose,
+            )?;
+
+            match command {
+                EventsCommands::List { issue_id, limit, all } => {
+                    let options = events::ListOptions { issue_id, limit, all };
+                    events::list_events(&client, options).await?;
+                }
+                EventsCommands::View { event_id, project } => {
+                    events::view_event(&client, &event_id, &project).await?;
                 }
             }
         }

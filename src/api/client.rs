@@ -1,4 +1,4 @@
-use crate::api::models::{ApiError, Event, Issue, IssueUpdate, ListIssuesParams, ListReleasesParams, Release};
+use crate::api::models::{ApiError, Event, EventListItem, Issue, IssueUpdate, ListEventsParams, ListIssuesParams, ListReleasesParams, Release};
 use crate::config::Config;
 use crate::error::{Result, SentryCliError};
 use reqwest::{Client, Response, StatusCode};
@@ -523,6 +523,128 @@ impl SentryClient {
         let url = self.api_url(&format!(
             "organizations/{}/releases/{}/",
             self.org_slug, version
+        ))?;
+
+        self.log_request("GET", &url);
+
+        let response = self
+            .client
+            .get(url)
+            .bearer_auth(&self.auth_token)
+            .send()
+            .await?;
+
+        self.handle_response(response).await
+    }
+
+    fn build_events_url(&self, issue_id: &str, params: &ListEventsParams) -> Result<Url> {
+        let mut url = self.api_url(&format!(
+            "organizations/{}/issues/{}/events/",
+            self.org_slug, issue_id
+        ))?;
+
+        {
+            let mut query_pairs = url.query_pairs_mut();
+
+            if let Some(limit) = params.limit {
+                query_pairs.append_pair("limit", &limit.to_string());
+            }
+
+            if let Some(cursor) = &params.cursor {
+                query_pairs.append_pair("cursor", cursor);
+            }
+        }
+
+        Ok(url)
+    }
+
+    pub async fn list_issue_events(
+        &self,
+        issue_id: &str,
+        params: ListEventsParams,
+    ) -> Result<Vec<EventListItem>> {
+        let url = self.build_events_url(issue_id, &params)?;
+
+        self.log_request("GET", &url);
+
+        let response = self
+            .client
+            .get(url)
+            .bearer_auth(&self.auth_token)
+            .send()
+            .await?;
+
+        self.handle_response(response).await
+    }
+
+    pub async fn list_all_issue_events(
+        &self,
+        issue_id: &str,
+        params: ListEventsParams,
+    ) -> Result<Vec<EventListItem>> {
+        let mut all_events = Vec::new();
+        let mut cursor: Option<String> = None;
+        let mut page = 1;
+
+        loop {
+            let page_params = ListEventsParams {
+                cursor: cursor.clone(),
+                ..params.clone()
+            };
+
+            let url = self.build_events_url(issue_id, &page_params)?;
+
+            self.log_request("GET", &url);
+            if self.verbose {
+                eprintln!("[verbose] Fetching page {}...", page);
+            }
+
+            let response = self
+                .client
+                .get(url)
+                .bearer_auth(&self.auth_token)
+                .send()
+                .await?;
+
+            let status = response.status();
+            self.log_response(status);
+
+            if !status.is_success() {
+                return Err(self.map_error_response(status, response).await);
+            }
+
+            let link_header = response
+                .headers()
+                .get("link")
+                .and_then(|v| v.to_str().ok())
+                .map(String::from);
+
+            let events: Vec<EventListItem> = response.json().await?;
+            let count = events.len();
+            all_events.extend(events);
+
+            if self.verbose {
+                eprintln!(
+                    "[verbose] Got {} events (total: {})",
+                    count,
+                    all_events.len()
+                );
+            }
+
+            cursor = Self::parse_next_cursor(link_header.as_deref());
+            if cursor.is_none() {
+                break;
+            }
+            page += 1;
+        }
+
+        Ok(all_events)
+    }
+
+    pub async fn get_event(&self, project: &str, event_id: &str) -> Result<Event> {
+        let url = self.api_url(&format!(
+            "projects/{}/{}/events/{}/",
+            self.org_slug, project, event_id
         ))?;
 
         self.log_request("GET", &url);

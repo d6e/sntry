@@ -109,3 +109,29 @@ pub struct EventTag {
     pub key: String,
     pub value: String,
 }
+
+/// Lighter event struct for list responses
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EventListItem {
+    pub id: String,
+    #[serde(default)]
+    pub event_id: Option<String>,
+    #[serde(default)]
+    pub message: Option<String>,
+    pub date_created: String,
+    #[serde(default)]
+    pub title: Option<String>,
+    #[serde(default)]
+    pub platform: Option<String>,
+    #[serde(default)]
+    pub tags: Vec<EventTag>,
+    #[serde(rename = "eventType", default)]
+    pub event_type: Option<String>,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct ListEventsParams {
+    pub limit: Option<u32>,
+    pub cursor: Option<String>,
+}

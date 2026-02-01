@@ -74,6 +74,18 @@ pub enum Commands {
         #[command(subcommand)]
         command: ReleasesCommands,
     },
+    /// View error events
+    #[command(
+        alias = "e",
+        after_help = "EXAMPLES:
+    sentry events list ISSUE-123
+    sentry events list ISSUE-123 --limit 50
+    sentry events view abc123def --project myproject"
+    )]
+    Events {
+        #[command(subcommand)]
+        command: EventsCommands,
+    },
     /// Manage CLI configuration
     #[command(
         alias = "cfg",
@@ -307,5 +319,45 @@ pub enum ReleasesCommands {
     View {
         /// Release version
         version: String,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum EventsCommands {
+    /// List events for an issue
+    #[command(
+        alias = "ls",
+        after_help = "EXAMPLES:
+    sentry events list ISSUE-123
+    sentry events list ISSUE-123 --limit 50
+    sentry events list ISSUE-123 --all"
+    )]
+    List {
+        /// Issue ID or short ID
+        issue_id: String,
+
+        /// Maximum number of results per page
+        #[arg(long, default_value = "25")]
+        limit: u32,
+
+        /// Fetch all pages (may be slow for large result sets)
+        #[arg(long)]
+        all: bool,
+    },
+
+    /// View detailed event information
+    #[command(
+        alias = "show",
+        alias = "v",
+        after_help = "EXAMPLES:
+    sentry events view abc123def --project myproject"
+    )]
+    View {
+        /// Event ID
+        event_id: String,
+
+        /// Project slug (required for fetching individual events)
+        #[arg(long, short)]
+        project: String,
     },
 }

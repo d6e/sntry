@@ -1,4 +1,4 @@
-use crate::api::models::{Breadcrumb, Event, EventEntry, ExceptionValue, Issue, Release, StackFrame};
+use crate::api::models::{Breadcrumb, Event, EventEntry, EventListItem, ExceptionValue, Issue, Release, StackFrame};
 use chrono::{DateTime, Utc};
 use colored::Colorize;
 use tabled::settings::Style;
@@ -106,7 +106,7 @@ pub fn print_issue_detail(issue: &Issue, event: Option<&Event>) {
     println!();
 }
 
-fn print_event_details(event: &Event) {
+pub fn print_event_details(event: &Event) {
     let separator = "=".repeat(80);
 
     println!();
@@ -400,4 +400,49 @@ pub fn print_release_details(release: &Release) {
     }
 
     println!();
+}
+
+#[derive(Tabled)]
+struct EventRow {
+    #[tabled(rename = "Event ID")]
+    event_id: String,
+    #[tabled(rename = "Title")]
+    title: String,
+    #[tabled(rename = "Platform")]
+    platform: String,
+    #[tabled(rename = "Created")]
+    created: String,
+}
+
+impl From<&EventListItem> for EventRow {
+    fn from(event: &EventListItem) -> Self {
+        let created = chrono::DateTime::parse_from_rfc3339(&event.date_created)
+            .map(|dt| dt.with_timezone(&Utc))
+            .ok();
+
+        Self {
+            event_id: event.event_id.clone().unwrap_or_else(|| event.id.clone()),
+            title: truncate_string(
+                event.title.as_deref()
+                    .or(event.message.as_deref())
+                    .unwrap_or("<no title>"),
+                50
+            ),
+            platform: event.platform.clone().unwrap_or_else(|| "-".to_string()),
+            created: created.map(|dt| format_relative_time(&dt)).unwrap_or_else(|| "-".to_string()),
+        }
+    }
+}
+
+pub fn print_events_table(events: &[EventListItem]) {
+    if events.is_empty() {
+        println!("No events found.");
+        return;
+    }
+
+    let rows: Vec<EventRow> = events.iter().map(EventRow::from).collect();
+    let table = Table::new(rows).with(Style::rounded()).to_string();
+
+    println!("{table}");
+    println!("Showing {} event(s)", events.len());
 }
