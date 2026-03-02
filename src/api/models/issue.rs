@@ -133,7 +133,8 @@ pub struct SentryAppInstallation {
 #[serde(rename_all = "camelCase")]
 pub struct SentryApp {
     pub slug: String,
-    pub name: String,
+    #[serde(default)]
+    pub name: Option<String>,
     pub uuid: String,
 }
 
