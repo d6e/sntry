@@ -1,4 +1,4 @@
-use crate::api::models::{ApiError, Event, EventListItem, Issue, IssueUpdate, ListEventsParams, ListIssuesParams, ListReleasesParams, Release};
+use crate::api::models::{ApiError, CreateExternalIssue, CreateNote, Event, EventListItem, ExternalIssue, Issue, IssueUpdate, ListEventsParams, ListIssuesParams, ListReleasesParams, Note, Release, SentryAppInstallation};
 use crate::config::Config;
 use crate::error::{Result, SentryCliError};
 use reqwest::{Client, Response, StatusCode};
@@ -645,6 +645,106 @@ impl SentryClient {
         let url = self.api_url(&format!(
             "projects/{}/{}/events/{}/",
             self.org_slug, project, event_id
+        ))?;
+
+        self.log_request("GET", &url);
+
+        let response = self
+            .client
+            .get(url)
+            .bearer_auth(&self.auth_token)
+            .send()
+            .await?;
+
+        self.handle_response(response).await
+    }
+
+    pub async fn create_comment(&self, issue_id: &str, text: &str) -> Result<Note> {
+        let url = self.api_url(&format!(
+            "organizations/{}/issues/{}/comments/",
+            self.org_slug, issue_id
+        ))?;
+
+        self.log_request("POST", &url);
+
+        let body = CreateNote {
+            text: text.to_string(),
+        };
+
+        let response = self
+            .client
+            .post(url)
+            .bearer_auth(&self.auth_token)
+            .json(&body)
+            .send()
+            .await?;
+
+        self.handle_response(response).await
+    }
+
+    pub async fn list_comments(&self, issue_id: &str) -> Result<Vec<Note>> {
+        let url = self.api_url(&format!(
+            "organizations/{}/issues/{}/comments/",
+            self.org_slug, issue_id
+        ))?;
+
+        self.log_request("GET", &url);
+
+        let response = self
+            .client
+            .get(url)
+            .bearer_auth(&self.auth_token)
+            .send()
+            .await?;
+
+        self.handle_response(response).await
+    }
+
+    pub async fn list_sentry_app_installations(&self) -> Result<Vec<SentryAppInstallation>> {
+        let url = self.api_url(&format!(
+            "organizations/{}/sentry-app-installations/",
+            self.org_slug
+        ))?;
+
+        self.log_request("GET", &url);
+
+        let response = self
+            .client
+            .get(url)
+            .bearer_auth(&self.auth_token)
+            .send()
+            .await?;
+
+        self.handle_response(response).await
+    }
+
+    pub async fn create_external_issue(
+        &self,
+        installation_uuid: &str,
+        body: &CreateExternalIssue,
+    ) -> Result<ExternalIssue> {
+        let url = self.api_url(&format!(
+            "sentry-app-installations/{}/external-issues/",
+            installation_uuid
+        ))?;
+
+        self.log_request("POST", &url);
+
+        let response = self
+            .client
+            .post(url)
+            .bearer_auth(&self.auth_token)
+            .json(body)
+            .send()
+            .await?;
+
+        self.handle_response(response).await
+    }
+
+    pub async fn list_external_issues(&self, issue_id: &str) -> Result<Vec<ExternalIssue>> {
+        let url = self.api_url(&format!(
+            "issues/{}/external-issues/",
+            issue_id
         ))?;
 
         self.log_request("GET", &url);

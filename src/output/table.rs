@@ -1,4 +1,4 @@
-use crate::api::models::{Breadcrumb, Event, EventEntry, EventListItem, ExceptionValue, Issue, Release, StackFrame};
+use crate::api::models::{Breadcrumb, Event, EventEntry, EventListItem, ExceptionValue, Issue, Note, Release, StackFrame};
 use chrono::{DateTime, Utc};
 use colored::Colorize;
 use tabled::settings::Style;
@@ -445,4 +445,46 @@ pub fn print_events_table(events: &[EventListItem]) {
 
     println!("{table}");
     println!("Showing {} event(s)", events.len());
+}
+
+#[derive(Tabled)]
+struct NoteRow {
+    #[tabled(rename = "ID")]
+    id: String,
+    #[tabled(rename = "Author")]
+    author: String,
+    #[tabled(rename = "Text")]
+    text: String,
+    #[tabled(rename = "Date")]
+    date: String,
+}
+
+impl From<&Note> for NoteRow {
+    fn from(note: &Note) -> Self {
+        let author = note
+            .user
+            .as_ref()
+            .map(|u| u.name.clone())
+            .unwrap_or_else(|| "-".to_string());
+
+        Self {
+            id: note.id.clone(),
+            author,
+            text: truncate_string(&note.text, 60),
+            date: format_relative_time(&note.date_created),
+        }
+    }
+}
+
+pub fn print_notes_table(notes: &[Note]) {
+    if notes.is_empty() {
+        println!("No comments found.");
+        return;
+    }
+
+    let rows: Vec<NoteRow> = notes.iter().map(NoteRow::from).collect();
+    let table = Table::new(rows).with(Style::rounded()).to_string();
+
+    println!("{table}");
+    println!("Showing {} comment(s)", notes.len());
 }

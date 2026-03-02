@@ -106,6 +106,27 @@ async fn run() -> error::Result<()> {
                 } => {
                     issues::merge_issues(&client, primary_id, other_ids).await?;
                 }
+                IssuesCommands::Comment {
+                    issue_id,
+                    text,
+                    list,
+                } => {
+                    if list || text.is_none() {
+                        issues::list_issue_comments(&client, &issue_id).await?;
+                    } else {
+                        issues::comment_issue(&client, &issue_id, &text.unwrap()).await?;
+                    }
+                }
+                IssuesCommands::Link {
+                    issue_ids,
+                    url,
+                    project,
+                    identifier,
+                    integration,
+                } => {
+                    issues::link_issues(&client, issue_ids, &url, project, identifier, &integration)
+                        .await?;
+                }
             }
         }
         Commands::Releases { command } => {

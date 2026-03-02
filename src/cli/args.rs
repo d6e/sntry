@@ -258,6 +258,48 @@ pub enum IssuesCommands {
         #[arg(required = true)]
         other_ids: Vec<String>,
     },
+
+    /// Add a comment (note) to an issue
+    #[command(after_help = "EXAMPLES:\n    sentry issues comment ISSUE-123 \"Tracked in PRG-456\"\n    sentry issues comment ISSUE-123 --list")]
+    Comment {
+        /// Issue ID
+        issue_id: String,
+
+        /// Comment text (omit to list comments)
+        text: Option<String>,
+
+        /// List comments instead of adding one
+        #[arg(long)]
+        list: bool,
+    },
+
+    /// Link issue(s) to an external issue tracker
+    #[command(after_help = "EXAMPLES:
+    sentry issues link 7207273243 --url https://linear.app/megacrit/issue/PRG-1234/title
+    sentry issues link 123 456 --url https://linear.app/megacrit/issue/PRG-1234/title
+    sentry issues link 123 --url https://example.com/issue/1 --project FOO --identifier FOO-1
+    sentry issues link 123 --url https://example.com/issue/1 --project FOO --identifier FOO-1 --integration jira")]
+    Link {
+        /// Issue ID(s) to link
+        #[arg(required = true)]
+        issue_ids: Vec<String>,
+
+        /// URL of the external issue
+        #[arg(long)]
+        url: String,
+
+        /// External project key (inferred from Linear URLs)
+        #[arg(long)]
+        project: Option<String>,
+
+        /// External issue identifier (inferred from Linear URLs)
+        #[arg(long)]
+        identifier: Option<String>,
+
+        /// Integration app slug
+        #[arg(long, default_value = "linear")]
+        integration: String,
+    },
 }
 
 #[derive(Subcommand)]

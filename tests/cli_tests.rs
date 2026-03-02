@@ -35,7 +35,9 @@ fn test_issues_help() {
         .stdout(predicate::str::contains("list"))
         .stdout(predicate::str::contains("view"))
         .stdout(predicate::str::contains("resolve"))
-        .stdout(predicate::str::contains("delete"));
+        .stdout(predicate::str::contains("delete"))
+        .stdout(predicate::str::contains("comment"))
+        .stdout(predicate::str::contains("link"));
 }
 
 #[test]
@@ -96,6 +98,28 @@ fn test_issues_list_requires_org() {
             predicate::str::contains("No organization specified")
                 .or(predicate::str::contains("Authentication failed")),
         );
+}
+
+#[test]
+fn test_issues_comment_help() {
+    sentry_cli()
+        .args(["issues", "comment", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("comment"))
+        .stdout(predicate::str::contains("--list"));
+}
+
+#[test]
+fn test_issues_link_help() {
+    sentry_cli()
+        .args(["issues", "link", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("--url"))
+        .stdout(predicate::str::contains("--project"))
+        .stdout(predicate::str::contains("--identifier"))
+        .stdout(predicate::str::contains("--integration"));
 }
 
 #[test]

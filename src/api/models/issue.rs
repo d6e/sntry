@@ -97,6 +97,20 @@ pub struct StatusDetails {
     pub ignore_until_escalating: Option<bool>,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Note {
+    pub id: String,
+    pub text: String,
+    pub user: Option<Actor>,
+    pub date_created: DateTime<Utc>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct CreateNote {
+    pub text: String,
+}
+
 #[derive(Debug, Default, Clone)]
 pub struct ListIssuesParams {
     pub project: Option<Vec<String>>,
@@ -105,4 +119,39 @@ pub struct ListIssuesParams {
     pub sort: Option<String>,
     pub limit: Option<u32>,
     pub cursor: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SentryAppInstallation {
+    pub uuid: String,
+    pub status: String,
+    pub app: SentryApp,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SentryApp {
+    pub slug: String,
+    pub name: String,
+    pub uuid: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CreateExternalIssue {
+    pub issue_id: u64,
+    pub web_url: String,
+    pub project: String,
+    pub identifier: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ExternalIssue {
+    pub id: String,
+    pub issue_id: String,
+    pub service_type: String,
+    pub display_name: String,
+    pub web_url: String,
 }

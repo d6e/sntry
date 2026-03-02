@@ -1,14 +1,18 @@
 mod assign;
+mod comment;
 mod delete;
 mod ignore;
+mod link;
 mod list;
 mod merge;
 mod resolve;
 mod view;
 
 pub use assign::assign_issues;
+pub use comment::{comment_issue, list_issue_comments};
 pub use delete::delete_issues;
 pub use ignore::ignore_issues;
+pub use link::link_issues;
 pub use list::{list_issues, ListOptions};
 pub use merge::merge_issues;
 pub use resolve::{resolve_issues, unresolve_issues};
