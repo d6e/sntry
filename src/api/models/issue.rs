@@ -98,12 +98,23 @@ pub struct StatusDetails {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+pub struct NoteData {
+    pub text: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Note {
     pub id: String,
-    pub text: String,
+    pub data: NoteData,
     pub user: Option<Actor>,
     pub date_created: DateTime<Utc>,
+}
+
+impl Note {
+    pub fn text(&self) -> &str {
+        &self.data.text
+    }
 }
 
 #[derive(Debug, Serialize)]
@@ -155,4 +166,43 @@ pub struct ExternalIssue {
     pub service_type: String,
     pub display_name: String,
     pub web_url: String,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn deserialize_note_from_api_response() {
+        let json = r#"{
+            "id": "12345",
+            "type": "note",
+            "data": {"text": "This is a comment"},
+            "user": {
+                "id": "1",
+                "name": "John Doe",
+                "email": "john@example.com"
+            },
+            "dateCreated": "2023-01-01T00:00:00Z"
+        }"#;
+        let note: Note = serde_json::from_str(json).unwrap();
+        assert_eq!(note.id, "12345");
+        assert_eq!(note.text(), "This is a comment");
+        let user = note.user.unwrap();
+        assert_eq!(user.name, "John Doe");
+        assert!(user.actor_type.is_none());
+    }
+
+    #[test]
+    fn deserialize_note_with_null_user() {
+        let json = r#"{
+            "id": "12345",
+            "data": {"text": "automated comment"},
+            "user": null,
+            "dateCreated": "2023-01-01T00:00:00Z"
+        }"#;
+        let note: Note = serde_json::from_str(json).unwrap();
+        assert_eq!(note.text(), "automated comment");
+        assert!(note.user.is_none());
+    }
 }

@@ -85,7 +85,7 @@ pub fn print_issue_detail(issue: &Issue, event: Option<&Event>) {
             "{:<12} {} ({})",
             "Assigned:".bold(),
             assigned.name,
-            assigned.email.as_deref().unwrap_or(&assigned.actor_type)
+            assigned.email.as_deref().unwrap_or(assigned.actor_type.as_deref().unwrap_or("unknown"))
         );
     } else {
         println!("{:<12} {}", "Assigned:".bold(), "Unassigned".dimmed());
@@ -470,7 +470,7 @@ impl From<&Note> for NoteRow {
         Self {
             id: note.id.clone(),
             author,
-            text: truncate_string(&note.text, 60),
+            text: truncate_string(note.text(), 60),
             date: format_relative_time(&note.date_created),
         }
     }
