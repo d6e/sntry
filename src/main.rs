@@ -117,6 +117,9 @@ async fn run() -> error::Result<()> {
                         issues::comment_issue(&client, &issue_id, &text.unwrap()).await?;
                     }
                 }
+                IssuesCommands::Tags { issue_id, tag_key } => {
+                    issues::get_issue_tag(&client, &issue_id, &tag_key).await?;
+                }
                 IssuesCommands::Link {
                     issue_ids,
                     url,

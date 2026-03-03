@@ -1,4 +1,4 @@
-use crate::api::models::{Breadcrumb, Event, EventEntry, EventListItem, ExceptionValue, Issue, Note, Release, StackFrame};
+use crate::api::models::{Breadcrumb, Event, EventEntry, EventListItem, ExceptionValue, Issue, Note, Release, StackFrame, TagDetails, TagValue};
 use chrono::{DateTime, Utc};
 use colored::Colorize;
 use tabled::settings::Style;
@@ -487,4 +487,50 @@ pub fn print_notes_table(notes: &[Note]) {
 
     println!("{table}");
     println!("Showing {} comment(s)", notes.len());
+}
+
+#[derive(Tabled)]
+struct TagValueRow {
+    #[tabled(rename = "Value")]
+    value: String,
+    #[tabled(rename = "Count")]
+    count: String,
+    #[tabled(rename = "Last Seen")]
+    last_seen: String,
+}
+
+impl From<&TagValue> for TagValueRow {
+    fn from(tv: &TagValue) -> Self {
+        let last_seen = tv
+            .last_seen
+            .as_deref()
+            .and_then(|s| chrono::DateTime::parse_from_rfc3339(s).ok())
+            .map(|dt| format_relative_time(&dt.with_timezone(&Utc)))
+            .unwrap_or_else(|| "-".to_string());
+
+        Self {
+            value: tv.value.clone(),
+            count: tv.count.to_string(),
+            last_seen,
+        }
+    }
+}
+
+pub fn print_tag_details_table(tag_details: &TagDetails) {
+    println!();
+    println!(
+        "{}: {} (total: {})",
+        "Tag".bold(),
+        tag_details.key.cyan(),
+        tag_details.total_values
+    );
+
+    if tag_details.top_values.is_empty() {
+        println!("No values found.");
+        return;
+    }
+
+    let rows: Vec<TagValueRow> = tag_details.top_values.iter().map(TagValueRow::from).collect();
+    let table = Table::new(rows).with(Style::rounded()).to_string();
+    println!("{table}");
 }

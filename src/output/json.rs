@@ -1,12 +1,7 @@
-use crate::api::models::{Event, EventListItem, ExternalIssue, Issue, Note, Release};
+use crate::api::models::{Event, EventListItem, ExternalIssue, Issue, IssueDetail, Note, Release, TagDetails};
 
 pub fn print_issues_json(issues: &[Issue]) {
     let json = serde_json::to_string_pretty(issues).unwrap_or_else(|_| "[]".to_string());
-    println!("{}", json);
-}
-
-pub fn print_issue_json(issue: &Issue) {
-    let json = serde_json::to_string_pretty(issue).unwrap_or_else(|_| "{}".to_string());
     println!("{}", json);
 }
 
@@ -42,6 +37,16 @@ pub fn print_note_json(note: &Note) {
 
 pub fn print_external_issue_json(issue: &ExternalIssue) {
     let json = serde_json::to_string_pretty(issue).unwrap_or_else(|_| "{}".to_string());
+    println!("{}", json);
+}
+
+pub fn print_issue_detail_json(detail: &IssueDetail) {
+    let json = serde_json::to_string_pretty(detail).unwrap_or_else(|_| "{}".to_string());
+    println!("{}", json);
+}
+
+pub fn print_tag_details_json(tag_details: &TagDetails) {
+    let json = serde_json::to_string_pretty(tag_details).unwrap_or_else(|_| "{}".to_string());
     println!("{}", json);
 }
 

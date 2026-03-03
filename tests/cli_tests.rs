@@ -37,7 +37,8 @@ fn test_issues_help() {
         .stdout(predicate::str::contains("resolve"))
         .stdout(predicate::str::contains("delete"))
         .stdout(predicate::str::contains("comment"))
-        .stdout(predicate::str::contains("link"));
+        .stdout(predicate::str::contains("link"))
+        .stdout(predicate::str::contains("tags"));
 }
 
 #[test]
@@ -120,6 +121,16 @@ fn test_issues_link_help() {
         .stdout(predicate::str::contains("--project"))
         .stdout(predicate::str::contains("--identifier"))
         .stdout(predicate::str::contains("--integration"));
+}
+
+#[test]
+fn test_issues_tags_help() {
+    sentry_cli()
+        .args(["issues", "tags", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("ISSUE_ID"))
+        .stdout(predicate::str::contains("TAG_KEY"));
 }
 
 #[test]

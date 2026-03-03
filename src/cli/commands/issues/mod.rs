@@ -6,6 +6,7 @@ mod link;
 mod list;
 mod merge;
 mod resolve;
+mod tags;
 mod view;
 
 pub use assign::assign_issues;
@@ -16,4 +17,5 @@ pub use link::link_issues;
 pub use list::{list_issues, ListOptions};
 pub use merge::merge_issues;
 pub use resolve::{resolve_issues, unresolve_issues};
+pub use tags::get_issue_tag;
 pub use view::view_issue;

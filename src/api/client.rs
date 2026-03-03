@@ -1,4 +1,4 @@
-use crate::api::models::{ApiError, CreateExternalIssue, CreateNote, Event, EventListItem, ExternalIssue, Issue, IssueUpdate, ListEventsParams, ListIssuesParams, ListReleasesParams, Note, Release, SentryAppInstallation};
+use crate::api::models::{ApiError, CreateExternalIssue, CreateNote, Event, EventListItem, ExternalIssue, Issue, IssueUpdate, ListEventsParams, ListIssuesParams, ListReleasesParams, Note, Release, SentryAppInstallation, TagDetails};
 use crate::config::Config;
 use crate::error::{Result, SentryCliError};
 use reqwest::{Client, Response, StatusCode};
@@ -259,6 +259,24 @@ impl SentryClient {
         let url = self.api_url(&format!(
             "organizations/{}/issues/{}/events/latest/",
             self.org_slug, issue_id
+        ))?;
+
+        self.log_request("GET", &url);
+
+        let response = self
+            .client
+            .get(url)
+            .bearer_auth(&self.auth_token)
+            .send()
+            .await?;
+
+        self.handle_response(response).await
+    }
+
+    pub async fn get_issue_tag(&self, issue_id: &str, tag_key: &str) -> Result<TagDetails> {
+        let url = self.api_url(&format!(
+            "organizations/{}/issues/{}/tags/{}/",
+            self.org_slug, issue_id, tag_key
         ))?;
 
         self.log_request("GET", &url);

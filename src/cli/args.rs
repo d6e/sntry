@@ -273,6 +273,17 @@ pub enum IssuesCommands {
         list: bool,
     },
 
+    /// View tag distribution for an issue
+    #[command(
+        after_help = "EXAMPLES:\n    sentry issues tags ISSUE-123 environment\n    sentry issues tags 7207273243 autoslay"
+    )]
+    Tags {
+        /// Issue ID or short ID
+        issue_id: String,
+        /// Tag key to query
+        tag_key: String,
+    },
+
     /// Link issue(s) to an external issue tracker
     #[command(after_help = "EXAMPLES:
     sentry issues link 7207273243 --url https://linear.app/megacrit/issue/PRG-1234/title
