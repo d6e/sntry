@@ -50,7 +50,45 @@ fn test_issues_list_help() {
         .stdout(predicate::str::contains("--project"))
         .stdout(predicate::str::contains("--status"))
         .stdout(predicate::str::contains("--format"))
-        .stdout(predicate::str::contains("--all"));
+        .stdout(predicate::str::contains("--all"))
+        .stdout(predicate::str::contains("--environment"))
+        .stdout(predicate::str::contains("--period"))
+        .stdout(predicate::str::contains("--start"))
+        .stdout(predicate::str::contains("--end"));
+}
+
+#[test]
+fn test_issues_list_period_conflicts_with_start() {
+    sentry_cli()
+        .args([
+            "issues",
+            "list",
+            "--period",
+            "24h",
+            "--start",
+            "2024-01-01T00:00:00Z",
+        ])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("cannot be used with"));
+}
+
+#[test]
+fn test_issues_list_end_requires_start() {
+    sentry_cli()
+        .args(["issues", "list", "--end", "2024-01-31T00:00:00Z"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("required"));
+}
+
+#[test]
+fn test_issues_list_sort_rejects_invalid() {
+    sentry_cli()
+        .args(["issues", "list", "--sort", "invalid"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("invalid value"));
 }
 
 #[test]

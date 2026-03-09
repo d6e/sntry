@@ -11,6 +11,10 @@ pub struct ListOptions {
     pub sort: String,
     pub limit: u32,
     pub all: bool,
+    pub environment: Option<String>,
+    pub period: Option<String>,
+    pub start: Option<String>,
+    pub end: Option<String>,
 }
 
 pub async fn list_issues(client: &SentryClient, options: ListOptions) -> Result<()> {
@@ -28,6 +32,10 @@ pub async fn list_issues(client: &SentryClient, options: ListOptions) -> Result<
         .project
         .map(|p| p.split(',').map(|s| s.trim().to_string()).collect());
 
+    let environments = options
+        .environment
+        .map(|e| e.split(',').map(|s| s.trim().to_string()).collect());
+
     let params = ListIssuesParams {
         project: projects,
         query: options.query,
@@ -35,6 +43,10 @@ pub async fn list_issues(client: &SentryClient, options: ListOptions) -> Result<
         sort: Some(options.sort),
         limit: Some(options.limit),
         cursor: None,
+        environment: environments,
+        stats_period: options.period,
+        start: options.start,
+        end: options.end,
     };
 
     let issues = if options.all {

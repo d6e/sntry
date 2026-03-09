@@ -57,14 +57,22 @@ async fn run() -> error::Result<()> {
                     sort,
                     limit,
                     all,
+                    environment,
+                    period,
+                    start,
+                    end,
                 } => {
                     let options = issues::ListOptions {
                         project,
                         status,
                         query,
-                        sort,
+                        sort: sort.to_string(),
                         limit,
                         all,
+                        environment,
+                        period,
+                        start,
+                        end,
                     };
                     issues::list_issues(&client, options).await?;
                 }

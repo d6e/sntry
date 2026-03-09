@@ -131,6 +131,10 @@ pub struct ListIssuesParams {
     pub sort: Option<String>,
     pub limit: Option<u32>,
     pub cursor: Option<String>,
+    pub environment: Option<Vec<String>>,
+    pub stats_period: Option<String>,
+    pub start: Option<String>,
+    pub end: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

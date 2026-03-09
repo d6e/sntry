@@ -16,6 +16,8 @@ struct IssueRow {
     status: String,
     #[tabled(rename = "Events")]
     events: String,
+    #[tabled(rename = "Users")]
+    users: String,
     #[tabled(rename = "Last Seen")]
     last_seen: String,
 }
@@ -28,6 +30,7 @@ impl From<&Issue> for IssueRow {
             title: truncate_string(&issue.title, 50),
             status: format_status_colored(&issue.status),
             events: issue.count.clone(),
+            users: issue.user_count.to_string(),
             last_seen: format_relative_time(&issue.last_seen),
         }
     }

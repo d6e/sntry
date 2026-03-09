@@ -79,6 +79,24 @@ impl SentryClient {
             if let Some(cursor) = &params.cursor {
                 query_pairs.append_pair("cursor", cursor);
             }
+
+            if let Some(environments) = &params.environment {
+                for env in environments {
+                    query_pairs.append_pair("environment", env);
+                }
+            }
+
+            if let Some(stats_period) = &params.stats_period {
+                query_pairs.append_pair("statsPeriod", stats_period);
+            }
+
+            if let Some(start) = &params.start {
+                query_pairs.append_pair("start", start);
+            }
+
+            if let Some(end) = &params.end {
+                query_pairs.append_pair("end", end);
+            }
         }
 
         Ok(url)
@@ -736,6 +754,17 @@ impl SentryClient {
         self.handle_response(response).await
     }
 
+    #[cfg(test)]
+    fn new_test(base_url: &str, org_slug: &str) -> Self {
+        Self {
+            client: Client::new(),
+            base_url: Url::parse(base_url).unwrap(),
+            auth_token: String::new(),
+            org_slug: org_slug.to_string(),
+            verbose: false,
+        }
+    }
+
     pub async fn create_external_issue(
         &self,
         installation_uuid: &str,
@@ -759,4 +788,97 @@ impl SentryClient {
         self.handle_response(response).await
     }
 
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::api::models::ListIssuesParams;
+
+    fn test_client() -> SentryClient {
+        SentryClient::new_test("https://sentry.io", "test-org")
+    }
+
+    #[test]
+    fn build_issues_url_defaults() {
+        let client = test_client();
+        let params = ListIssuesParams::default();
+        let url = client.build_issues_url(&params).unwrap();
+        assert_eq!(
+            url.path(),
+            "/api/0/organizations/test-org/issues/"
+        );
+        // query_pairs_mut leaves an empty query string
+        assert!(url.query().map_or(true, |q| q.is_empty()));
+    }
+
+    #[test]
+    fn build_issues_url_single_environment() {
+        let client = test_client();
+        let params = ListIssuesParams {
+            environment: Some(vec!["production".to_string()]),
+            ..Default::default()
+        };
+        let url = client.build_issues_url(&params).unwrap();
+        assert!(url.query().unwrap().contains("environment=production"));
+    }
+
+    #[test]
+    fn build_issues_url_multiple_environments() {
+        let client = test_client();
+        let params = ListIssuesParams {
+            environment: Some(vec!["production".to_string(), "staging".to_string()]),
+            ..Default::default()
+        };
+        let url = client.build_issues_url(&params).unwrap();
+        let query = url.query().unwrap();
+        // Each environment should be a separate param
+        assert!(query.contains("environment=production"));
+        assert!(query.contains("environment=staging"));
+    }
+
+    #[test]
+    fn build_issues_url_stats_period() {
+        let client = test_client();
+        let params = ListIssuesParams {
+            stats_period: Some("14d".to_string()),
+            ..Default::default()
+        };
+        let url = client.build_issues_url(&params).unwrap();
+        assert!(url.query().unwrap().contains("statsPeriod=14d"));
+    }
+
+    #[test]
+    fn build_issues_url_start_end() {
+        let client = test_client();
+        let params = ListIssuesParams {
+            start: Some("2024-01-01T00:00:00Z".to_string()),
+            end: Some("2024-01-31T23:59:59Z".to_string()),
+            ..Default::default()
+        };
+        let url = client.build_issues_url(&params).unwrap();
+        let query = url.query().unwrap();
+        assert!(query.contains("start=2024-01-01T00%3A00%3A00Z"));
+        assert!(query.contains("end=2024-01-31T23%3A59%3A59Z"));
+    }
+
+    #[test]
+    fn build_issues_url_combined_params() {
+        let client = test_client();
+        let params = ListIssuesParams {
+            project: Some(vec!["myproject".to_string()]),
+            sort: Some("user".to_string()),
+            limit: Some(50),
+            environment: Some(vec!["production".to_string()]),
+            stats_period: Some("30d".to_string()),
+            ..Default::default()
+        };
+        let url = client.build_issues_url(&params).unwrap();
+        let query = url.query().unwrap();
+        assert!(query.contains("project=myproject"));
+        assert!(query.contains("sort=user"));
+        assert!(query.contains("limit=50"));
+        assert!(query.contains("environment=production"));
+        assert!(query.contains("statsPeriod=30d"));
+    }
 }

@@ -1,3 +1,5 @@
+use std::fmt;
+
 use clap::{Parser, Subcommand, ValueEnum};
 use clap_complete::Shell;
 
@@ -7,6 +9,30 @@ pub enum OutputFormat {
     Table,
     Json,
     Compact,
+}
+
+#[derive(Debug, Clone, Copy, Default, ValueEnum)]
+pub enum SortBy {
+    #[default]
+    Date,
+    New,
+    Freq,
+    User,
+    Inbox,
+    Trends,
+}
+
+impl fmt::Display for SortBy {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            SortBy::Date => write!(f, "date"),
+            SortBy::New => write!(f, "new"),
+            SortBy::Freq => write!(f, "freq"),
+            SortBy::User => write!(f, "user"),
+            SortBy::Inbox => write!(f, "inbox"),
+            SortBy::Trends => write!(f, "trends"),
+        }
+    }
 }
 
 #[derive(Parser)]
@@ -118,7 +144,10 @@ pub enum IssuesCommands {
         after_help = "EXAMPLES:
     sentry issues list
     sentry issues list --project myproject --status unresolved
-    sentry issues list --query \"is:unresolved\" --limit 100"
+    sentry issues list --query \"is:unresolved\" --limit 100
+    sentry issues list --environment production --period 14d
+    sentry issues list --start 2024-01-01T00:00:00Z --end 2024-01-31T23:59:59Z
+    sentry issues list --sort user --environment production,staging"
     )]
     List {
         /// Filter by project slug(s), comma-separated
@@ -133,9 +162,9 @@ pub enum IssuesCommands {
         #[arg(long)]
         query: Option<String>,
 
-        /// Sort by: date, new, freq, user
-        #[arg(long, default_value = "date")]
-        sort: String,
+        /// Sort by: date, new, freq, user, inbox, trends
+        #[arg(long, value_enum, default_value = "date")]
+        sort: SortBy,
 
         /// Maximum number of results per page
         #[arg(long, default_value = "25")]
@@ -144,6 +173,22 @@ pub enum IssuesCommands {
         /// Fetch all pages (may be slow for large result sets)
         #[arg(long)]
         all: bool,
+
+        /// Filter by environment(s), comma-separated
+        #[arg(long, short = 'e')]
+        environment: Option<String>,
+
+        /// Stats period (e.g. 24h, 14d, 30d)
+        #[arg(long)]
+        period: Option<String>,
+
+        /// Start of date range (ISO-8601)
+        #[arg(long, conflicts_with = "period")]
+        start: Option<String>,
+
+        /// End of date range (ISO-8601)
+        #[arg(long, conflicts_with = "period", requires = "start")]
+        end: Option<String>,
     },
 
     /// View detailed issue information
