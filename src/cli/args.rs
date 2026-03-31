@@ -329,6 +329,18 @@ pub enum IssuesCommands {
         tag_key: String,
     },
 
+    /// List external issue links for an issue
+    #[command(
+        alias = "ls-links",
+        after_help = "EXAMPLES:
+    sentry issues links ISSUE-123
+    sentry issues links 7207273243"
+    )]
+    Links {
+        /// Issue ID or short ID
+        issue_id: String,
+    },
+
     /// Link issue(s) to an external issue tracker
     #[command(after_help = "EXAMPLES:
     sentry issues link 7207273243 --url https://linear.app/megacrit/issue/PRG-1234/title

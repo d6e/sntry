@@ -128,6 +128,9 @@ async fn run() -> error::Result<()> {
                 IssuesCommands::Tags { issue_id, tag_key } => {
                     issues::get_issue_tag(&client, &issue_id, &tag_key).await?;
                 }
+                IssuesCommands::Links { issue_id } => {
+                    issues::list_external_issues(&client, &issue_id).await?;
+                }
                 IssuesCommands::Link {
                     issue_ids,
                     url,

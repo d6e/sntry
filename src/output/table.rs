@@ -1,4 +1,4 @@
-use crate::api::models::{Breadcrumb, Event, EventEntry, EventListItem, ExceptionValue, Issue, Note, Release, StackFrame, TagDetails, TagValue};
+use crate::api::models::{Breadcrumb, Event, EventEntry, EventListItem, ExceptionValue, ExternalIssue, Issue, Note, Release, StackFrame, TagDetails, TagValue};
 use chrono::{DateTime, Utc};
 use colored::Colorize;
 use tabled::settings::Style;
@@ -536,4 +536,40 @@ pub fn print_tag_details_table(tag_details: &TagDetails) {
     let rows: Vec<TagValueRow> = tag_details.top_values.iter().map(TagValueRow::from).collect();
     let table = Table::new(rows).with(Style::rounded()).to_string();
     println!("{table}");
+}
+
+#[derive(Tabled)]
+struct ExternalIssueRow {
+    #[tabled(rename = "ID")]
+    id: String,
+    #[tabled(rename = "Integration")]
+    service_type: String,
+    #[tabled(rename = "Identifier")]
+    display_name: String,
+    #[tabled(rename = "URL")]
+    web_url: String,
+}
+
+impl From<&ExternalIssue> for ExternalIssueRow {
+    fn from(issue: &ExternalIssue) -> Self {
+        Self {
+            id: issue.id.clone(),
+            service_type: issue.service_type.clone(),
+            display_name: issue.display_name.clone(),
+            web_url: truncate_string(&issue.web_url, 60),
+        }
+    }
+}
+
+pub fn print_external_issues_table(issues: &[ExternalIssue]) {
+    if issues.is_empty() {
+        println!("No external issue links found.");
+        return;
+    }
+
+    let rows: Vec<ExternalIssueRow> = issues.iter().map(ExternalIssueRow::from).collect();
+    let table = Table::new(rows).with(Style::rounded()).to_string();
+
+    println!("{table}");
+    println!("Showing {} link(s)", issues.len());
 }

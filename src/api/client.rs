@@ -765,6 +765,24 @@ impl SentryClient {
         }
     }
 
+    pub async fn list_external_issues(&self, issue_id: &str) -> Result<Vec<ExternalIssue>> {
+        let url = self.api_url(&format!(
+            "organizations/{}/issues/{}/external-issues/",
+            self.org_slug, issue_id
+        ))?;
+
+        self.log_request("GET", &url);
+
+        let response = self
+            .client
+            .get(url)
+            .bearer_auth(&self.auth_token)
+            .send()
+            .await?;
+
+        self.handle_response(response).await
+    }
+
     pub async fn create_external_issue(
         &self,
         installation_uuid: &str,

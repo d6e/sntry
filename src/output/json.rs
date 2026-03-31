@@ -40,6 +40,11 @@ pub fn print_external_issue_json(issue: &ExternalIssue) {
     println!("{}", json);
 }
 
+pub fn print_external_issues_json(issues: &[ExternalIssue]) {
+    let json = serde_json::to_string_pretty(issues).unwrap_or_else(|_| "[]".to_string());
+    println!("{}", json);
+}
+
 pub fn print_issue_detail_json(detail: &IssueDetail) {
     let json = serde_json::to_string_pretty(detail).unwrap_or_else(|_| "{}".to_string());
     println!("{}", json);
