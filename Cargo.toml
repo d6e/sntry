@@ -1,10 +1,10 @@
 [package]
-name = "sentry-cli"
+name = "sntry"
 version = "0.2.0"
 edition = "2021"
 description = "CLI tool for managing Sentry issues"
 license = "MIT"
-repository = "https://github.com/d6e/sentry-cli"
+repository = "https://github.com/d6e/sntry"
 readme = "README.md"
 keywords = ["sentry", "cli", "issues", "error-tracking"]
 categories = ["command-line-utilities", "development-tools"]

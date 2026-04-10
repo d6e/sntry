@@ -1,6 +1,6 @@
 # sntry
 
-[![CI](https://github.com/d6e/sentry-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/d6e/sentry-cli/actions/workflows/ci.yml)
+[![CI](https://github.com/d6e/sntry/actions/workflows/ci.yml/badge.svg)](https://github.com/d6e/sntry/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A command-line tool for managing Sentry issues.
@@ -16,8 +16,8 @@ cargo install --path .
 ### Build from source
 
 ```bash
-git clone https://github.com/d6e/sentry-cli
-cd sentry-cli
+git clone https://github.com/d6e/sntry
+cd sntry
 cargo build --release
 ```
 
