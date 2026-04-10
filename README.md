@@ -1,4 +1,4 @@
-# sentry-cli
+# sntry
 
 [![CI](https://github.com/d6e/sentry-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/d6e/sentry-cli/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -21,7 +21,7 @@ cd sentry-cli
 cargo build --release
 ```
 
-The binary will be at `target/release/sentry-cli`.
+The binary will be at `target/release/sntry`.
 
 ## Configuration
 
@@ -37,11 +37,11 @@ export SENTRY_ORG="your-organization"
 Or create a config file:
 
 ```bash
-sentry-cli config init
-# Edit ~/.config/sentry-cli/config.toml
+sntry config init
+# Edit ~/.config/sntry/config.toml
 ```
 
-Config file format (`~/.config/sentry-cli/config.toml`):
+Config file format (`~/.config/sntry/config.toml`):
 
 ```toml
 default_org = "your-organization"
@@ -57,7 +57,7 @@ default_project = "your-project"
 For self-hosted Sentry instances:
 
 ```bash
-sentry-cli --server https://sentry.yourcompany.com issues list
+sntry --server https://sentry.yourcompany.com issues list
 ```
 
 Or set in config:
@@ -72,117 +72,117 @@ server_url = "https://sentry.yourcompany.com"
 
 ```bash
 # List all unresolved issues
-sentry-cli issues list
+sntry issues list
 
 # Filter by project
-sentry-cli issues list --project backend
+sntry issues list --project backend
 
 # Filter by status
-sentry-cli issues list --status resolved
+sntry issues list --status resolved
 
 # Custom search query
-sentry-cli issues list --query "is:unresolved level:error"
+sntry issues list --query "is:unresolved level:error"
 
 # JSON output (for scripting)
-sentry-cli issues list --output json
+sntry issues list --output json
 
 # Fetch all pages
-sentry-cli issues list --all --limit 100
+sntry issues list --all --limit 100
 ```
 
 ### View Issue Details
 
 ```bash
-sentry-cli issues view 1234567890
-sentry-cli issues view PROJ-123
+sntry issues view 1234567890
+sntry issues view PROJ-123
 
 # JSON output
-sentry-cli issues view 1234567890 --output json
+sntry issues view 1234567890 --output json
 ```
 
 ### Resolve Issues
 
 ```bash
 # Resolve a single issue
-sentry-cli issues resolve 1234567890
+sntry issues resolve 1234567890
 
 # Resolve multiple issues
-sentry-cli issues resolve 1234567890 1234567891
+sntry issues resolve 1234567890 1234567891
 
 # Resolve in specific release
-sentry-cli issues resolve 1234567890 --in-release 1.2.3
+sntry issues resolve 1234567890 --in-release 1.2.3
 
 # Resolve in next release
-sentry-cli issues resolve 1234567890 --in-next-release
+sntry issues resolve 1234567890 --in-next-release
 ```
 
 ### Unresolve Issues
 
 ```bash
-sentry-cli issues unresolve 1234567890
+sntry issues unresolve 1234567890
 ```
 
 ### Assign Issues
 
 ```bash
 # Assign to user
-sentry-cli issues assign 1234567890 --to user@example.com
+sntry issues assign 1234567890 --to user@example.com
 
 # Assign to team
-sentry-cli issues assign 1234567890 --to team:backend
+sntry issues assign 1234567890 --to team:backend
 
 # Unassign
-sentry-cli issues assign 1234567890 --unassign
+sntry issues assign 1234567890 --unassign
 ```
 
 ### Ignore Issues
 
 ```bash
 # Ignore indefinitely
-sentry-cli issues ignore 1234567890
+sntry issues ignore 1234567890
 
 # Ignore for 24 hours (1440 minutes)
-sentry-cli issues ignore 1234567890 --duration 1440
+sntry issues ignore 1234567890 --duration 1440
 
 # Ignore until 100 more events
-sentry-cli issues ignore 1234567890 --count 100
+sntry issues ignore 1234567890 --count 100
 
 # Ignore until escalating
-sentry-cli issues ignore 1234567890 --until-escalating
+sntry issues ignore 1234567890 --until-escalating
 ```
 
 ### Delete Issues
 
 ```bash
 # Delete with confirmation prompt
-sentry-cli issues delete 1234567890
+sntry issues delete 1234567890
 
 # Skip confirmation
-sentry-cli issues delete 1234567890 --confirm
+sntry issues delete 1234567890 --confirm
 
 # Delete multiple
-sentry-cli issues delete 1234567890 1234567891 --confirm
+sntry issues delete 1234567890 1234567891 --confirm
 ```
 
 ### Merge Issues
 
 ```bash
 # Merge issues into a primary issue
-sentry-cli issues merge 1234567890 1234567891 1234567892
+sntry issues merge 1234567890 1234567891 1234567892
 ```
 
 ### Configuration Management
 
 ```bash
 # Create config file
-sentry-cli config init
+sntry config init
 
 # Show current config
-sentry-cli config show
+sntry config show
 
 # Set config values
-sentry-cli config set default_org my-org
-sentry-cli config set auth_token sntrys_...
+sntry config set default_org my-org
+sntry config set auth_token sntrys_...
 ```
 
 ## Global Options
@@ -211,21 +211,21 @@ sentry-cli config set auth_token sntrys_...
 
 ```bash
 # Get all issue IDs
-sentry-cli issues list --output json | jq -r '.[].id'
+sntry issues list --output json | jq -r '.[].id'
 
 # Count issues by status
-sentry-cli issues list --all --output json | jq 'group_by(.status) | map({status: .[0].status, count: length})'
+sntry issues list --all --output json | jq 'group_by(.status) | map({status: .[0].status, count: length})'
 
 # Resolve all issues matching a query
-sentry-cli issues list --query "is:unresolved browser:Chrome" --output json | \
+sntry issues list --query "is:unresolved browser:Chrome" --output json | \
   jq -r '.[].id' | \
-  xargs sentry-cli issues resolve
+  xargs sntry issues resolve
 ```
 
 ### Verbose mode for debugging
 
 ```bash
-sentry-cli -v issues list
+sntry -v issues list
 # [verbose] Server: https://sentry.io/
 # [verbose] Organization: my-org
 # [verbose] GET https://sentry.io/api/0/organizations/my-org/issues/...

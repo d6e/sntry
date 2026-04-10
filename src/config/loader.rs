@@ -50,7 +50,7 @@ impl Config {
 
 /// Get the path to the config file
 pub fn config_path() -> PathBuf {
-    ProjectDirs::from("", "", "sentry-cli")
+    ProjectDirs::from("", "", "sntry")
         .map(|dirs| dirs.config_dir().join("config.toml"))
         .unwrap_or_else(|| PathBuf::from(".").join("config.toml"))
 }

@@ -10,7 +10,7 @@ keywords = ["sentry", "cli", "issues", "error-tracking"]
 categories = ["command-line-utilities", "development-tools"]
 
 [[bin]]
-name = "sentry"
+name = "sntry"
 path = "src/main.rs"
 
 [dependencies]

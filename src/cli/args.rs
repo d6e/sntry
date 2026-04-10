@@ -36,14 +36,14 @@ impl fmt::Display for SortBy {
 }
 
 #[derive(Parser)]
-#[command(name = "sentry-cli")]
+#[command(name = "sntry")]
 #[command(about = "CLI tool for managing Sentry issues", long_about = None)]
 #[command(version)]
 #[command(after_help = "EXAMPLES:
-    sentry issues list --project myproject
-    sentry issues view ISSUE-123
-    sentry issues resolve ISSUE-123
-    sentry config show")]
+    sntry issues list --project myproject
+    sntry issues view ISSUE-123
+    sntry issues resolve ISSUE-123
+    sntry config show")]
 pub struct Cli {
     /// Sentry server URL (default: https://sentry.io)
     #[arg(long, global = true)]
@@ -79,10 +79,10 @@ pub enum Commands {
     #[command(
         alias = "i",
         after_help = "EXAMPLES:
-    sentry issues list --project myproject
-    sentry issues list --status unresolved --limit 50
-    sentry issues view ISSUE-123
-    sentry issues resolve ISSUE-123 ISSUE-456"
+    sntry issues list --project myproject
+    sntry issues list --status unresolved --limit 50
+    sntry issues view ISSUE-123
+    sntry issues resolve ISSUE-123 ISSUE-456"
     )]
     Issues {
         #[command(subcommand)]
@@ -92,9 +92,9 @@ pub enum Commands {
     #[command(
         alias = "r",
         after_help = "EXAMPLES:
-    sentry releases list
-    sentry releases list --limit 50
-    sentry releases view v0.90.1"
+    sntry releases list
+    sntry releases list --limit 50
+    sntry releases view v0.90.1"
     )]
     Releases {
         #[command(subcommand)]
@@ -104,9 +104,9 @@ pub enum Commands {
     #[command(
         alias = "e",
         after_help = "EXAMPLES:
-    sentry events list ISSUE-123
-    sentry events list ISSUE-123 --limit 50
-    sentry events view abc123def --project myproject"
+    sntry events list ISSUE-123
+    sntry events list ISSUE-123 --limit 50
+    sntry events view abc123def --project myproject"
     )]
     Events {
         #[command(subcommand)]
@@ -116,9 +116,9 @@ pub enum Commands {
     #[command(
         alias = "cfg",
         after_help = "EXAMPLES:
-    sentry config init
-    sentry config show
-    sentry config set default_org myorg"
+    sntry config init
+    sntry config show
+    sntry config set default_org myorg"
     )]
     Config {
         #[command(subcommand)]
@@ -126,9 +126,9 @@ pub enum Commands {
     },
     /// Generate shell completions
     #[command(after_help = "EXAMPLES:
-    sentry completions bash > ~/.bash_completion.d/sentry
-    sentry completions zsh > ~/.zfunc/_sentry
-    sentry completions fish > ~/.config/fish/completions/sentry.fish")]
+    sntry completions bash > ~/.bash_completion.d/sntry
+    sntry completions zsh > ~/.zfunc/_sntry
+    sntry completions fish > ~/.config/fish/completions/sntry.fish")]
     Completions {
         /// Shell to generate completions for
         #[arg(value_enum)]
@@ -142,12 +142,12 @@ pub enum IssuesCommands {
     #[command(
         alias = "ls",
         after_help = "EXAMPLES:
-    sentry issues list
-    sentry issues list --project myproject --status unresolved
-    sentry issues list --query \"is:unresolved\" --limit 100
-    sentry issues list --environment production --period 14d
-    sentry issues list --start 2024-01-01T00:00:00Z --end 2024-01-31T23:59:59Z
-    sentry issues list --sort user --environment production,staging"
+    sntry issues list
+    sntry issues list --project myproject --status unresolved
+    sntry issues list --query \"is:unresolved\" --limit 100
+    sntry issues list --environment production --period 14d
+    sntry issues list --start 2024-01-01T00:00:00Z --end 2024-01-31T23:59:59Z
+    sntry issues list --sort user --environment production,staging"
     )]
     List {
         /// Filter by project slug(s), comma-separated
@@ -196,8 +196,8 @@ pub enum IssuesCommands {
         alias = "show",
         alias = "v",
         after_help = "EXAMPLES:
-    sentry issues view ISSUE-123
-    sentry issues view 12345678"
+    sntry issues view ISSUE-123
+    sntry issues view 12345678"
     )]
     View {
         /// Issue ID or short ID
@@ -208,8 +208,8 @@ pub enum IssuesCommands {
     #[command(
         alias = "r",
         after_help = "EXAMPLES:
-    sentry issues resolve ISSUE-123
-    sentry issues resolve ISSUE-123 ISSUE-456 --in-next-release"
+    sntry issues resolve ISSUE-123
+    sntry issues resolve ISSUE-123 ISSUE-456 --in-next-release"
     )]
     Resolve {
         /// Issue ID(s) to resolve
@@ -227,7 +227,7 @@ pub enum IssuesCommands {
 
     /// Unresolve one or more issues
     #[command(after_help = "EXAMPLES:
-    sentry issues unresolve ISSUE-123")]
+    sntry issues unresolve ISSUE-123")]
     Unresolve {
         /// Issue ID(s) to unresolve
         #[arg(required = true)]
@@ -238,9 +238,9 @@ pub enum IssuesCommands {
     #[command(
         alias = "a",
         after_help = "EXAMPLES:
-    sentry issues assign ISSUE-123 --to user@example.com
-    sentry issues assign ISSUE-123 --to team:backend
-    sentry issues assign ISSUE-123 --unassign"
+    sntry issues assign ISSUE-123 --to user@example.com
+    sntry issues assign ISSUE-123 --to team:backend
+    sntry issues assign ISSUE-123 --unassign"
     )]
     Assign {
         /// Issue ID(s) to assign
@@ -258,9 +258,9 @@ pub enum IssuesCommands {
 
     /// Ignore issue(s)
     #[command(after_help = "EXAMPLES:
-    sentry issues ignore ISSUE-123 --duration 60
-    sentry issues ignore ISSUE-123 --count 100
-    sentry issues ignore ISSUE-123 --until-escalating")]
+    sntry issues ignore ISSUE-123 --duration 60
+    sntry issues ignore ISSUE-123 --count 100
+    sntry issues ignore ISSUE-123 --until-escalating")]
     Ignore {
         /// Issue ID(s) to ignore
         #[arg(required = true)]
@@ -281,7 +281,7 @@ pub enum IssuesCommands {
 
     /// Delete issue(s)
     #[command(after_help = "EXAMPLES:
-    sentry issues delete ISSUE-123 --confirm")]
+    sntry issues delete ISSUE-123 --confirm")]
     Delete {
         /// Issue ID(s) to delete
         #[arg(required = true)]
@@ -294,7 +294,7 @@ pub enum IssuesCommands {
 
     /// Merge multiple issues into one
     #[command(after_help = "EXAMPLES:
-    sentry issues merge ISSUE-123 ISSUE-456 ISSUE-789")]
+    sntry issues merge ISSUE-123 ISSUE-456 ISSUE-789")]
     Merge {
         /// Primary issue ID (issues will be merged into this one)
         primary_id: String,
@@ -305,7 +305,7 @@ pub enum IssuesCommands {
     },
 
     /// Add a comment (note) to an issue
-    #[command(after_help = "EXAMPLES:\n    sentry issues comment ISSUE-123 \"Tracked in PRG-456\"\n    sentry issues comment ISSUE-123 --list")]
+    #[command(after_help = "EXAMPLES:\n    sntry issues comment ISSUE-123 \"Tracked in PRG-456\"\n    sntry issues comment ISSUE-123 --list")]
     Comment {
         /// Issue ID
         issue_id: String,
@@ -320,7 +320,7 @@ pub enum IssuesCommands {
 
     /// View tag distribution for an issue
     #[command(
-        after_help = "EXAMPLES:\n    sentry issues tags ISSUE-123 environment\n    sentry issues tags 7207273243 autoslay"
+        after_help = "EXAMPLES:\n    sntry issues tags ISSUE-123 environment\n    sntry issues tags 7207273243 autoslay"
     )]
     Tags {
         /// Issue ID or short ID
@@ -333,8 +333,8 @@ pub enum IssuesCommands {
     #[command(
         alias = "ls-links",
         after_help = "EXAMPLES:
-    sentry issues links ISSUE-123
-    sentry issues links 7207273243"
+    sntry issues links ISSUE-123
+    sntry issues links 7207273243"
     )]
     Links {
         /// Issue ID or short ID
@@ -343,10 +343,10 @@ pub enum IssuesCommands {
 
     /// Link issue(s) to an external issue tracker
     #[command(after_help = "EXAMPLES:
-    sentry issues link 7207273243 --url https://linear.app/megacrit/issue/PRG-1234/title
-    sentry issues link 123 456 --url https://linear.app/megacrit/issue/PRG-1234/title
-    sentry issues link 123 --url https://example.com/issue/1 --project FOO --identifier FOO-1
-    sentry issues link 123 --url https://example.com/issue/1 --project FOO --identifier FOO-1 --integration jira")]
+    sntry issues link 7207273243 --url https://linear.app/megacrit/issue/PRG-1234/title
+    sntry issues link 123 456 --url https://linear.app/megacrit/issue/PRG-1234/title
+    sntry issues link 123 --url https://example.com/issue/1 --project FOO --identifier FOO-1
+    sntry issues link 123 --url https://example.com/issue/1 --project FOO --identifier FOO-1 --integration jira")]
     Link {
         /// Issue ID(s) to link
         #[arg(required = true)]
@@ -374,18 +374,18 @@ pub enum IssuesCommands {
 pub enum ConfigCommands {
     /// Create default config file
     #[command(after_help = "EXAMPLES:
-    sentry config init")]
+    sntry config init")]
     Init,
 
     /// Display current configuration
     #[command(after_help = "EXAMPLES:
-    sentry config show")]
+    sntry config show")]
     Show,
 
     /// Set a configuration value
     #[command(after_help = "EXAMPLES:
-    sentry config set default_org myorg
-    sentry config set auth_token sk-...")]
+    sntry config set default_org myorg
+    sntry config set auth_token sk-...")]
     Set {
         /// Configuration key
         key: String,
@@ -400,9 +400,9 @@ pub enum ReleasesCommands {
     #[command(
         alias = "ls",
         after_help = "EXAMPLES:
-    sentry releases list
-    sentry releases list --limit 50
-    sentry releases list --all"
+    sntry releases list
+    sntry releases list --limit 50
+    sntry releases list --all"
     )]
     List {
         /// Sentry search query string
@@ -423,8 +423,8 @@ pub enum ReleasesCommands {
         alias = "show",
         alias = "v",
         after_help = "EXAMPLES:
-    sentry releases view v0.90.1
-    sentry releases view 1.0.0"
+    sntry releases view v0.90.1
+    sntry releases view 1.0.0"
     )]
     View {
         /// Release version
@@ -438,9 +438,9 @@ pub enum EventsCommands {
     #[command(
         alias = "ls",
         after_help = "EXAMPLES:
-    sentry events list ISSUE-123
-    sentry events list ISSUE-123 --limit 50
-    sentry events list ISSUE-123 --all"
+    sntry events list ISSUE-123
+    sntry events list ISSUE-123 --limit 50
+    sntry events list ISSUE-123 --all"
     )]
     List {
         /// Issue ID or short ID
@@ -460,7 +460,7 @@ pub enum EventsCommands {
         alias = "show",
         alias = "v",
         after_help = "EXAMPLES:
-    sentry events view abc123def --project myproject"
+    sntry events view abc123def --project myproject"
     )]
     View {
         /// Event ID

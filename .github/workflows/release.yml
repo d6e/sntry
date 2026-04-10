@@ -46,21 +46,21 @@ jobs:
         if: matrix.os != 'windows-latest'
         run: |
           cd target/${{ matrix.target }}/release
-          tar czvf ../../../sentry-${{ github.ref_name }}-${{ matrix.target }}.tar.gz sentry
+          tar czvf ../../../sntry-${{ github.ref_name }}-${{ matrix.target }}.tar.gz sntry
           cd -
 
       - name: Package (Windows)
         if: matrix.os == 'windows-latest'
         run: |
           cd target/${{ matrix.target }}/release
-          7z a ../../../sentry-${{ github.ref_name }}-${{ matrix.target }}.zip sentry.exe
+          7z a ../../../sntry-${{ github.ref_name }}-${{ matrix.target }}.zip sntry.exe
           cd ..\..\..
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sentry-${{ matrix.target }}
-          path: sentry-${{ github.ref_name }}-${{ matrix.target }}.*
+          name: sntry-${{ matrix.target }}
+          path: sntry-${{ github.ref_name }}-${{ matrix.target }}.*
 
   release:
     name: Create Release
@@ -78,5 +78,5 @@ jobs:
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
-          files: sentry-*
+          files: sntry-*
           generate_release_notes: true
