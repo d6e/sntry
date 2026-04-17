@@ -2,7 +2,7 @@ use assert_cmd::Command;
 use predicates::prelude::*;
 
 fn sentry_cli() -> Command {
-    Command::new(assert_cmd::cargo::cargo_bin!("sentry"))
+    Command::new(assert_cmd::cargo::cargo_bin!("sntry"))
 }
 
 #[test]
@@ -22,7 +22,7 @@ fn test_version() {
         .arg("--version")
         .assert()
         .success()
-        .stdout(predicate::str::contains("sentry"));
+        .stdout(predicate::str::contains("sntry"));
 }
 
 #[test]
