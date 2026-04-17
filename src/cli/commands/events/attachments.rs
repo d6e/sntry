@@ -10,7 +10,7 @@ pub async fn list_attachments(client: &SentryClient, event_id: &str, project: &s
 
     match get_format() {
         OutputFormat::Json => {
-            println!("{}", serde_json::to_string_pretty(&attachments).unwrap_or_else(|_| "[]".to_string()));
+            println!("{}", serde_json::to_string(&attachments).unwrap_or_else(|_| "[]".to_string()));
         }
         OutputFormat::Table | OutputFormat::Compact => {
             if attachments.is_empty() {
