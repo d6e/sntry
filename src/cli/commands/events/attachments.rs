@@ -10,7 +10,7 @@ pub async fn list_attachments(client: &SentryClient, event_id: &str, project: &s
 
     match get_format() {
         OutputFormat::Json => {
-            println!("{}", serde_json::to_string_pretty(&attachments).unwrap());
+            println!("{}", serde_json::to_string_pretty(&attachments).unwrap_or_else(|_| "[]".to_string()));
         }
         OutputFormat::Table | OutputFormat::Compact => {
             if attachments.is_empty() {
@@ -76,13 +76,20 @@ pub async fn download_attachment(
         .download_attachment(project, event_id, &attachment.id)
         .await?;
 
+    let safe_name = Path::new(&attachment.name)
+        .file_name()
+        .map(|n| n.to_string_lossy().to_string())
+        .unwrap_or_else(|| format!("attachment-{}", attachment.id));
+
     let output_path = Path::new(output);
     let final_path = if output_path.is_dir() || output.ends_with('/') {
-        std::fs::create_dir_all(output_path).ok();
-        output_path.join(&attachment.name)
+        std::fs::create_dir_all(output_path)?;
+        output_path.join(&safe_name)
     } else {
         if let Some(parent) = output_path.parent() {
-            std::fs::create_dir_all(parent).ok();
+            if !parent.as_os_str().is_empty() {
+                std::fs::create_dir_all(parent)?;
+            }
         }
         output_path.to_path_buf()
     };
@@ -90,7 +97,7 @@ pub async fn download_attachment(
     std::fs::write(&final_path, &data)?;
     print_success(&format!(
         "Downloaded {} ({}) to {}",
-        attachment.name,
+        safe_name,
         format_size(data.len() as u64),
         final_path.display()
     ));
