@@ -5,8 +5,8 @@ use clap_complete::Shell;
 
 #[derive(Debug, Clone, Copy, Default, ValueEnum)]
 pub enum OutputFormat {
-    #[default]
     Table,
+    #[default]
     Json,
     Compact,
 }
@@ -58,7 +58,7 @@ pub struct Cli {
     pub token: Option<String>,
 
     /// Output format (table, json, compact)
-    #[arg(long, short = 'O', global = true, value_enum, default_value = "table")]
+    #[arg(long, short = 'O', global = true, value_enum, default_value = "json")]
     pub format: OutputFormat,
 
     /// Suppress success messages

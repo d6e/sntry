@@ -10,7 +10,7 @@ pub use table::*;
 
 /// Global output format setting (thread-safe)
 /// 0 = Table, 1 = Json, 2 = Compact
-static OUTPUT_FORMAT: AtomicU8 = AtomicU8::new(0);
+static OUTPUT_FORMAT: AtomicU8 = AtomicU8::new(1);
 static QUIET_MODE: AtomicBool = AtomicBool::new(false);
 
 pub fn set_format(format: OutputFormat) {
