@@ -31,6 +31,13 @@ pub enum EventEntry {
     Breadcrumbs {
         data: BreadcrumbsData,
     },
+    #[serde(rename = "debugmeta")]
+    DebugMeta {
+        data: serde_json::Value,
+    },
+    Threads {
+        data: serde_json::Value,
+    },
     #[serde(other)]
     Other,
 }
@@ -76,6 +83,14 @@ pub struct StackFrame {
     pub post_context: Vec<String>,
     #[serde(default)]
     pub in_app: bool,
+    #[serde(default)]
+    pub instruction_addr: Option<String>,
+    #[serde(default)]
+    pub package: Option<String>,
+    #[serde(default)]
+    pub trust: Option<String>,
+    #[serde(default)]
+    pub image_addr: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -134,4 +149,23 @@ pub struct EventListItem {
 pub struct ListEventsParams {
     pub limit: Option<u32>,
     pub cursor: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Attachment {
+    pub id: String,
+    #[serde(rename = "type")]
+    pub attachment_type: String,
+    pub name: String,
+    #[serde(default)]
+    pub mimetype: Option<String>,
+    #[serde(default)]
+    pub size: Option<u64>,
+    #[serde(default)]
+    pub date_created: Option<String>,
+    #[serde(default)]
+    pub sha1: Option<String>,
+    #[serde(default)]
+    pub event_id: Option<String>,
 }

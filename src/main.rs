@@ -179,6 +179,26 @@ async fn run() -> error::Result<()> {
                 EventsCommands::View { event_id, project } => {
                     events::view_event(&client, &event_id, &project).await?;
                 }
+                EventsCommands::Attachments {
+                    event_id,
+                    project,
+                    download,
+                    output,
+                    id,
+                } => {
+                    if download {
+                        events::download_attachment(
+                            &client,
+                            &event_id,
+                            &project,
+                            &output,
+                            id.as_deref(),
+                        )
+                        .await?;
+                    } else {
+                        events::list_attachments(&client, &event_id, &project).await?;
+                    }
+                }
             }
         }
         Commands::Config { command } => match command {

@@ -1,4 +1,4 @@
-use crate::api::models::{ApiError, CreateExternalIssue, CreateNote, Event, EventListItem, ExternalIssue, Issue, IssueUpdate, ListEventsParams, ListIssuesParams, ListReleasesParams, Note, Release, SentryAppInstallation, TagDetails};
+use crate::api::models::{ApiError, Attachment, CreateExternalIssue, CreateNote, Event, EventListItem, ExternalIssue, Issue, IssueUpdate, ListEventsParams, ListIssuesParams, ListReleasesParams, Note, Release, SentryAppInstallation, TagDetails};
 use crate::config::Config;
 use crate::error::{Result, SentryCliError};
 use reqwest::{Client, Response, StatusCode};
@@ -693,6 +693,59 @@ impl SentryClient {
             .await?;
 
         self.handle_response(response).await
+    }
+
+    pub async fn list_event_attachments(
+        &self,
+        project: &str,
+        event_id: &str,
+    ) -> Result<Vec<Attachment>> {
+        let url = self.api_url(&format!(
+            "projects/{}/{}/events/{}/attachments/",
+            self.org_slug, project, event_id
+        ))?;
+
+        self.log_request("GET", &url);
+
+        let response = self
+            .client
+            .get(url)
+            .bearer_auth(&self.auth_token)
+            .send()
+            .await?;
+
+        self.handle_response(response).await
+    }
+
+    pub async fn download_attachment(
+        &self,
+        project: &str,
+        event_id: &str,
+        attachment_id: &str,
+    ) -> Result<Vec<u8>> {
+        let mut url = self.api_url(&format!(
+            "projects/{}/{}/events/{}/attachments/{}/",
+            self.org_slug, project, event_id, attachment_id
+        ))?;
+        url.query_pairs_mut().append_pair("download", "1");
+
+        self.log_request("GET", &url);
+
+        let response = self
+            .client
+            .get(url)
+            .bearer_auth(&self.auth_token)
+            .send()
+            .await?;
+
+        let status = response.status();
+        self.log_response(status);
+
+        if status.is_success() {
+            Ok(response.bytes().await?.to_vec())
+        } else {
+            Err(self.map_error_response(status, response).await)
+        }
     }
 
     pub async fn create_comment(&self, issue_id: &str, text: &str) -> Result<Note> {

@@ -1489,27 +1489,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d767eb0aabc880b29956c35734170f26ed551a859dbd361d140cdbeca61ab1e2"
 
 [[package]]
-name = "sentry-cli"
-version = "0.2.0"
-dependencies = [
- "assert_cmd",
- "chrono",
- "clap",
- "clap_complete",
- "colored",
- "directories",
- "predicates",
- "reqwest",
- "serde",
- "serde_json",
- "tabled",
- "thiserror",
- "tokio",
- "toml",
- "url",
-]
-
-[[package]]
 name = "serde"
 version = "1.0.228"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1600,6 +1579,27 @@ name = "smallvec"
 version = "1.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
+
+[[package]]
+name = "sntry"
+version = "0.2.0"
+dependencies = [
+ "assert_cmd",
+ "chrono",
+ "clap",
+ "clap_complete",
+ "colored",
+ "directories",
+ "predicates",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tabled",
+ "thiserror",
+ "tokio",
+ "toml",
+ "url",
+]
 
 [[package]]
 name = "socket2"

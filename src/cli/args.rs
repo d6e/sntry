@@ -470,4 +470,33 @@ pub enum EventsCommands {
         #[arg(long, short)]
         project: String,
     },
+
+    /// List or download event attachments (e.g. minidumps)
+    #[command(
+        alias = "att",
+        after_help = "EXAMPLES:
+    sntry events attachments abc123def --project myproject
+    sntry events attachments abc123def --project myproject --download -o /tmp/crash.dmp
+    sntry events attachments abc123def --project myproject --download --id 12345 -o /tmp/"
+    )]
+    Attachments {
+        /// Event ID
+        event_id: String,
+
+        /// Project slug
+        #[arg(long, short)]
+        project: String,
+
+        /// Download attachment (default: first minidump)
+        #[arg(long, short)]
+        download: bool,
+
+        /// Output path (file or directory)
+        #[arg(long, short, default_value = ".")]
+        output: String,
+
+        /// Specific attachment ID to download
+        #[arg(long)]
+        id: Option<String>,
+    },
 }
